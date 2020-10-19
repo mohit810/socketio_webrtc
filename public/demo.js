@@ -6,7 +6,7 @@ let remoteSessionDescription = document.getElementById('remoteSessionDescription
 let localSessionDescription = document.getElementById('localSessionDescription')
 let video1 = document.getElementById('video1')
 
-let roomNumber, encryptedSdp
+let roomNumber, encryptedSdp, PublisherFlag, uid
 
 /* eslint-env browser */
 var log = msg => {
@@ -16,6 +16,7 @@ var log = msg => {
 const socket = io()
 
 window.createSession = isPublisher => {
+  PublisherFlag = isPublisher
   if (inputRoomNumber.value === '') {
     alert("please enter a room name.")
   } else{
@@ -36,8 +37,9 @@ window.createSession = isPublisher => {
   }
 
     socket.emit("createConnection", roomNumber)
-    socket.on('created', room => {
-      console.log("console log from created socket:",room)
+    socket.on('created', event => {
+      uid =  event.uid
+      console.log("console log from created socket:",event)
       navigator.mediaDevices.getUserMedia({video: true, audio: false})
           .then(stream => {
             pc.addStream(video1.srcObject = stream)
@@ -48,8 +50,9 @@ window.createSession = isPublisher => {
           }).catch(log)
     })
 
-    socket.on('joined', room => {
-      console.log("console log from joined socket:",room)
+    socket.on('joined', event => {
+      uid = event.uid
+      console.log("console log from joined socket:",event)
       pc.addTransceiver('video')
       pc.createOffer()
           .then(d => pc.setLocalDescription(d))
@@ -66,22 +69,31 @@ window.createSession = isPublisher => {
     socket.on('ready', () =>{
       var obj = JSON.parse(JSON.stringify({
         "sdp": encryptedSdp,
-        "roomName": roomNumber
+        "roomName": roomNumber,
+        "uid": uid
       }))
       socket.emit("offer",obj)
     })
 
     socket.on('answer', (event) =>{
-      let sd = event
-      remoteSessionDescription.value = sd
-      if (sd === '') {
-        return alert('Session Description must not be empty')
-      }
-
-      try {
-        pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
-      } catch (e) {
-        alert(e)
+        let tempUid = event.uid
+        let sd = event.sdp
+        remoteSessionDescription.value = sd
+        if (sd === '') {
+          return alert('Session Description must not be empty')
+        }
+      if (PublisherFlag  && tempUid == uid) {
+        try {
+          pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
+        } catch (e) {
+          alert(e)
+        }
+      } else if (tempUid == uid){
+        try {
+          pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
+        } catch (e) {
+          alert(e)
+        }
       }
     })
 

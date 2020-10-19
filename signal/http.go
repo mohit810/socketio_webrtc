@@ -13,7 +13,6 @@ import (
 var (
 	SocketServer *socketio.Server
 	answer       string
-	RoomName     string
 )
 
 // HTTPSDPServer starts a HTTP Server that consumes SDPs
@@ -33,10 +32,18 @@ func HTTPSDPServer() (offerOut chan string, answerIn chan string) {
 		/*roomName = append(roomName, msg)*/
 		if SocketServer.RoomLen("/", roomName) == 0 {
 			SocketServer.JoinRoom("/", roomName, s)
-			s.Emit("created", roomName)
+			responsePkt := structs.Response{
+				RoomName: roomName,
+				Uid:      s.ID(),
+			}
+			s.Emit("created", responsePkt)
 		} else if SocketServer.RoomLen("/", roomName) == 1 {
 			SocketServer.JoinRoom("/", roomName, s)
-			s.Emit("joined", roomName)
+			responsePkt := structs.Response{
+				RoomName: roomName,
+				Uid:      s.ID(),
+			}
+			s.Emit("joined", responsePkt)
 		}
 		return "recv " + roomName
 	})
@@ -56,10 +63,14 @@ func HTTPSDPServer() (offerOut chan string, answerIn chan string) {
 
 	SocketServer.OnEvent("/", "offer", func(s socketio.Conn, data structs.Offer) string {
 		/*SocketServer.BroadcastToRoom("/", data.RoomName, "offer", data.Sdp)*/ //for one-one chatting
-		RoomName = data.RoomName
 		offerOut <- data.Sdp
 		answer = <-answerIn
-		SocketServer.BroadcastToRoom("/", RoomName, "answer", answer)
+		responsePkt := structs.Response{
+			Sdp:      answer,
+			RoomName: data.RoomName,
+			Uid:      s.ID(),
+		}
+		SocketServer.BroadcastToRoom("/", responsePkt.RoomName, "answer", responsePkt)
 		return "done"
 	})
 

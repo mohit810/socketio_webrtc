@@ -1,6 +1,6 @@
 package structs
 
-type Offer struct {
+type Response struct {
 	Sdp      string `json:"sdp"`
 	RoomName string `json:"roomName"`
 	Uid      string `json:"uid"`
