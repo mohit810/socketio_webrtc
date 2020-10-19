@@ -85,10 +85,6 @@ window.createSession = isPublisher => {
       }
     })
 
-  window.startSession = () => {
-
-  }
-
   let btns = createSessionButton
   for (let i = 0; i < btns.length; i++) {
     btns[i].style = 'display: none'
