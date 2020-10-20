@@ -37,7 +37,7 @@ func HTTPSDPServer() (offerOut chan string, answerIn chan string) {
 				Uid:      s.ID(),
 			}
 			s.Emit("created", responsePkt)
-		} else if SocketServer.RoomLen("/", roomName) == 1 {
+		} else {
 			SocketServer.JoinRoom("/", roomName, s)
 			responsePkt := structs.Response{
 				RoomName: roomName,
