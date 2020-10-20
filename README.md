@@ -14,4 +14,4 @@ Run `main.go`
 ## Big Thanks to the following 
 
 * [Sean Der](https://github.com/Sean-Der) at [Poin/webrtc](https://github.com/pion/webrtc)
-* [go-socket.io](https://github.com/googollee/go-socket.io)
+* [go-socket.io](https://github.com/googollee/go-socket.io) `v1.4.3`
