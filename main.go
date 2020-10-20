@@ -14,8 +14,8 @@ import (
 
 	"github.com/pion/rtcp"
 	"github.com/pion/webrtc/v3"
-	"practice/socketio_webrtc/encryptor"
-	"practice/socketio_webrtc/signal"
+	"socketio_webrtc/encryptor"
+	"socketio_webrtc/signal"
 )
 
 const (
